@@ -15,5 +15,5 @@ INSERT INTO role (title, salary, department_id) VALUES ('Marketing Director', 60
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('John', 'Doe', 1, NULL);
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('Jim', 'Bob', 2, 1);
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('Ricky', 'Bobby', 3, 2);
-INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('Bob', 'Builder', 4, 3);
+INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('Jackie', 'Chan', 4, 3);
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('Emma', 'Stone', 5, 4);
