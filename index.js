@@ -1,20 +1,20 @@
-
+// Imports the specified modules and intializes the environment variables. 
 const inquirer = require('inquirer');
 const Database = require('./lib/queries');
 const utils = require('./lib/utils');
 require('dotenv').config();
-
+// Flag to prevent multiple initializations.
 let isStarted = false;
-
+// DB config from environment variables. 
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE
 };
-
+// Create a new database instance.
 const db = new Database(dbConfig);
-
+// Displays the questions for the main menu. 
 const mainMenuQuestions = [
     {
       type: 'list',
@@ -32,22 +32,22 @@ const mainMenuQuestions = [
       ],
     },
   ];
-  
+  // Start function to initialize the application.
   async function start() {
-    if (isStarted) return;
+    if (isStarted) return;// Prevents re-cursive calls to the start function.
     isStarted = true;
 
-      await db.init();
+      await db.init();// Initialize database connection.
       mainMenu(); 
   }
-
+// Start the application and catch any errors.
 start().catch(err => console.error(err));
 
 async function mainMenu() {
     try {
         const { action } = await inquirer.prompt(mainMenuQuestions);
         switch (action) {
-            case 'View All Employees':
+            case 'View All Employees':// Additional cases for every action. 
                 await viewAllEmployees();
                 break;
             case 'Add Employee':
@@ -69,21 +69,21 @@ async function mainMenu() {
                 await addDepartment();
                 break;
             case 'Quit':
-                console.log('Goodbye!');
-                await db.close();
+                console.log('Goodbye!'); 
+                await db.close(); // Closes the connection to the db. 
                 return; 
         }
-        mainMenu(); 
+        mainMenu(); // Should show the main menu again after completing an action. 
     } catch (error) {
         console.error('Error in main menu:', error);
-        await db.close(); 
+        await db.close(); // Closes the connection to the db. 
     }
 }
   
-
+// Displays all employees. 
 async function viewAllEmployees() {
     try {
-
+        // SQL query to join employee, role, and department tables and format the output.
         const query = `
             SELECT e.id, 
                    e.first_name, 
@@ -96,21 +96,23 @@ async function viewAllEmployees() {
             LEFT JOIN role r ON e.role_id = r.id
             LEFT JOIN department d ON r.department_id = d.id
             LEFT JOIN employee m ON e.manager_id = m.id`;
-
+            // The 'SELECT Clause' will retrieve specified coloumns from the db and each column is identified with an alias to avoid ambiguity. 
+            // The 'FROM Clause' will indicate the main table in which the data is being pulled from. 
+            // The 'LEFT JOIN Clauses' will include data from other related tables and even if some employees don't have data in specific coloumns they will still be included in the result, but with a NULL value. 
         const [employees] = await db.connection.execute(query);
 
-        console.table(employees);
+        console.table(employees); // Display the employees in a table format. 
     } catch (error) {
         console.error('Error fetching employees:', error);
     }
 }
-
+// Function to add an employee. 
 async function addEmployee() {
-
+    // Fetch roles, employees, and departmens and display them as choices. 
     const roles = await db.viewAllRoles();
     const employees = await db.viewAllEmployees();
     const departments = await db.viewAllDepartments();
-    
+    // Map over roles, employees, and departments to format for inquirer choices.
     const roleChoices = roles.map(role => ({
         name: role.title,
         value: role.id
@@ -125,7 +127,7 @@ async function addEmployee() {
         name: dept.name,
         value: dept.id
     }));
-
+    // Prompts user for new employee details. 
     const employeeData = await inquirer.prompt([
         {
             type: 'input',
@@ -161,6 +163,7 @@ async function addEmployee() {
     ]);
 
     try {
+        // Constructs the new employee object. 
         const newEmployee = {
             first_name: employeeData.firstName,
             last_name: employeeData.lastName,
@@ -169,19 +172,19 @@ async function addEmployee() {
             department_id: employeeData.departmentId
         };
 
-        await db.addEmployee(newEmployee);
-        console.log('Employee added successfully');
+        await db.addEmployee(newEmployee); // Adds the employee to the database. 
+        console.log('Employee added successfully'); 
     } catch (error) {
         console.error('Error adding employee:', error);
     }
 }
 
-  
+
 async function updateEmployeeRole() {
     
-    const employees = await db.viewAllEmployees();
+    const employees = await db.viewAllEmployees(); 
     const roles = await db.viewAllRoles();
-
+    // Retrieves the list of employees and roles for the user to choose from. 
     const updateRoleData = await inquirer.prompt([
         {
             type: 'list',
@@ -196,14 +199,14 @@ async function updateEmployeeRole() {
             choices: utils.formatRoleList(roles)
         }
     ]);
-
+    // Performs the update operation in the database. 
     await db.updateEmployeeRole(updateRoleData.employeeId, updateRoleData.roleId);
     console.log('Employee role updated successfully.');
 }
-  
+
 async function viewAllRoles() {
     try {
-        const roles = await db.viewAllRoles();
+        const roles = await db.viewAllRoles(); // Display all roles from the db. 
         console.table(roles);
     } catch (error) {
         console.error('Error fetching roles:', error);
@@ -211,8 +214,8 @@ async function viewAllRoles() {
 }
   
 async function addRole() {
-    const departments = await db.viewAllDepartments();
-    const roleData = await inquirer.prompt([
+    const departments = await db.viewAllDepartments();  
+    const roleData = await inquirer.prompt([ // Prompts the user for role details and adds it to the database.
         {
             type: 'input',
             name: 'title',
@@ -243,7 +246,7 @@ async function addRole() {
 
 async function viewAllDepartments() {
     try {
-        const departments = await db.viewAllDepartments();
+        const departments = await db.viewAllDepartments(); // Displays all departments from the db. 
         console.table(departments);
     } catch (error) {
         console.error('Error fetching departments:', error);
@@ -251,7 +254,7 @@ async function viewAllDepartments() {
 }
 
 async function addDepartment() {
-    const departmentData = await inquirer.prompt([
+    const departmentData = await inquirer.prompt([ // Prompts the user for the dept. name and adds it to the db. 
         {
             type: 'input',
             name: 'name',
