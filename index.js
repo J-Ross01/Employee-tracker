@@ -96,7 +96,7 @@ async function viewAllEmployees() {
             LEFT JOIN role r ON e.role_id = r.id
             LEFT JOIN department d ON r.department_id = d.id
             LEFT JOIN employee m ON e.manager_id = m.id`;
-            // The 'SELECT Clause' will retrieve specified coloumns from the db and each column is identified with an alias to avoid ambiguity. 
+            // The 'SELECT Clause' will retrieve specified coloumns from the db, and each column is identified with an alias to avoid ambiguity. 
             // The 'FROM Clause' will indicate the main table in which the data is being pulled from. 
             // The 'LEFT JOIN Clauses' will include data from other related tables and even if some employees don't have data in specific coloumns they will still be included in the result, but with a NULL value. 
         const [employees] = await db.connection.execute(query);
@@ -133,7 +133,7 @@ async function addEmployee() {
             type: 'input',
             name: 'firstName',
             message: "Enter the employee's first name:",
-            validate: utils.notEmpty
+            validate: utils.notEmpty // Will validate that there is a value inputted. Function is linked from the utilis file. 
         },
         {
             type: 'input',
